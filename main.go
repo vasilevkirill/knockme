@@ -319,14 +319,22 @@ func VasyaConnect(m map[string]string, ipaddress string) bool {
 	if m == nil {
 		return false
 	}
+
 	keys := reflect.ValueOf(m).MapKeys()
 	protocol := keys[0].String()
 	port := m[protocol]
 	service := ipaddress + ":" + port
 	Verb("Knock  " + service + " protocol " + protocol)
-	conn, _ := net.DialTimeout(protocol, service, 100000000)
+	conn, err := net.DialTimeout(protocol, service, 100000000)
+	if err != nil {
+		return false
+	}
 	if protocol == "udp" {
-		_, _ = conn.Write([]byte("a"))
+		_, err := conn.Write([]byte("a"))
+		if err != nil {
+			Verb(err.Error())
+			return false
+		}
 	}
 	Verb("Knock End")
 	return false
@@ -432,7 +440,12 @@ func getDNSDOH(record string, t dns.Type) (str []string, err error) {
 	c.Close()
 	var ret []string
 	for _, a := range rsp.Answer {
-		ret = append(ret, a.Data[1:len(a.Data)-1])
+		if a.Data[0:1] == "\"" {
+			ret = append(ret, a.Data[1:len(a.Data)-1])
+		} else {
+			ret = append(ret, a.Data)
+		}
+
 	}
 	return ret, nil
 }
