@@ -326,7 +326,7 @@ func VasyaConnect(m map[string]string, ipaddress string) bool {
 	Verb("Knock  " + service + " protocol " + protocol)
 	conn, _ := net.DialTimeout(protocol, service, 100000000)
 	if protocol == "udp" {
-		_, _ = conn.Write([]byte(nil))
+		_, _ = conn.Write([]byte("a"))
 	}
 	Verb("Knock End")
 	return false
